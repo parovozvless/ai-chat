@@ -1,6 +1,10 @@
 # AI Chat
 
+**Живая версия:** https://parovozvless.github.io/ai-chat/
+
 Простой чат с нейросетью в стиле Material You. Полностью статический сайт: без серверов, аккаунтов и базы данных. Работает на GitHub Pages.
+
+![AI Chat](preview.jpg)
 
 ## Как начать
 

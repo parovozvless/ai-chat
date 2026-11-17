@@ -1,5 +1,5 @@
 /* Offline app shell. API calls always go to the network. */
-const CACHE = 'ai-chat-shell-20261118025019';
+const CACHE = 'ai-chat-shell-20261118025414';
 const SHELL = [
   './',
   './index.html',
