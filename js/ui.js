@@ -584,7 +584,7 @@
         Store.save(true);
         UI.closeOverlay(true);
         if (global.Onboarding) global.Onboarding.show();
-        else if (global.App) { App.hardReset(); App.openSettings(); }
+        else if (global.UI) global.UI.snackbar('Ключ удалён');
       });
       node.querySelector('[data-act="pick-model"]').addEventListener('click', () => {
         close();
