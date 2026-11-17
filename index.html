@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://api.groq.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self'; form-action 'none'; base-uri 'none'">
+<title>AI Chat</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="AI Chat">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <aside class="sidebar" id="sidebar" aria-label="Навигация">
+    <div class="sidebar__brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M13.2 2.6 5.4 13.1c-.5.7 0 1.6.8 1.6h4.1l-1.1 6.5c-.1.9 1 1.4 1.6.7l8-10.7c.5-.7 0-1.6-.8-1.6h-4.2l1.2-6.2c.2-.9-.9-1.4-1.5-.6Z" fill="currentColor"/></svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">AI Chat</span>
+        <span class="brand-sub" id="brandSub">чат с нейросетью</span>
+      </div>
+      <button class="icon-btn sidebar__collapse" data-action="toggle-sidebar" title="Свернуть панель (⌘B)" aria-label="Свернуть панель">
+        <span data-icon="panel-left"></span>
+      </button>
+    </div>
+
+    <button class="new-chat" data-action="new-chat">
+      <span class="new-chat__icon" data-icon="edit"></span>
+      <span class="new-chat__label">Новый чат</span>
+      <kbd class="new-chat__kbd">⌘N</kbd>
+    </button>
+
+    <div class="search">
+      <span class="search__icon" data-icon="search"></span>
+      <input id="search" type="search" placeholder="Поиск по чатам" autocomplete="off" spellcheck="false" aria-label="Поиск по чатам">
+      <button class="search__clear" data-action="clear-search" aria-label="Очистить" hidden><span data-icon="close"></span></button>
+    </div>
+
+    <div class="sidebar__section">
+      <span class="section-label">Недавние</span>
+      <span class="section-count" id="chatCount"></span>
+    </div>
+    <nav class="chatlist" id="chatlist" aria-label="Чаты"></nav>
+
+    <div class="sidebar__footer">
+      <button class="model-card" data-action="open-models" title="Выбрать модель">
+        <span class="model-card__dot"></span>
+        <span class="model-card__text">
+          <span class="model-card__label">Модель</span>
+          <span class="model-card__value" id="modelCardValue">—</span>
+        </span>
+        <span class="model-card__chevron" data-icon="chevron-up-down"></span>
+      </button>
+      <div class="footer-actions">
+        <button class="footer-btn" data-action="open-settings"><span data-icon="tune"></span><span>Настройки</span></button>
+        <button class="icon-btn" data-action="toggle-theme" id="themeBtn" title="Сменить тему" aria-label="Сменить тему"><span data-icon="sun"></span></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="scrim" id="scrim" data-action="close-drawer"></div>
+
+  <main class="main">
+    <header class="appbar">
+      <button class="icon-btn appbar__menu" data-action="toggle-sidebar" aria-label="Меню"><span data-icon="menu"></span></button>
+      <div class="appbar__title">
+        <input class="title-input" id="chatTitle" value="Новый чат" aria-label="Название чата" spellcheck="false">
+        <div class="appbar__sub" id="chatSub">готов к работе</div>
+      </div>
+      <div class="appbar__actions">
+        <button class="model-chip" id="modelChip" data-action="open-models">
+          <span class="model-chip__icon" data-icon="bolt"></span>
+          <span class="model-chip__name" id="modelChipName">—</span>
+          <span class="model-chip__chevron" data-icon="expand-more"></span>
+        </button>
+        <button class="icon-btn" data-action="open-palette" title="Команды (⌘K)" aria-label="Команды"><span data-icon="command"></span></button>
+        <button class="icon-btn" data-action="export-menu" title="Экспорт" aria-label="Экспорт"><span data-icon="download"></span></button>
+        <button class="icon-btn" data-action="open-settings" title="Настройки (⌘,)" aria-label="Настройки"><span data-icon="tune"></span></button>
+      </div>
+    </header>
+
+    <div class="scroll" id="scroll">
+      <div class="thread" id="thread"></div>
+    </div>
+
+    <button class="scroll-bottom" id="scrollBottom" data-action="scroll-bottom" aria-label="Вниз">
+      <span data-icon="arrow-down"></span>
+    </button>
+
+    <div class="composer-area">
+      <div class="composer" id="composer">
+        <div class="attachments" id="attachments" hidden></div>
+        <div class="composer__input">
+          <button class="icon-btn composer__attach" data-action="attach" title="Прикрепить изображение" aria-label="Прикрепить изображение">
+            <span data-icon="plus"></span>
+          </button>
+          <textarea id="input" rows="1" placeholder="Спросите что угодно…" aria-label="Сообщение" spellcheck="false"></textarea>
+          <button class="send" id="sendBtn" data-action="send" aria-label="Отправить" disabled>
+            <span data-icon="arrow-up"></span>
+          </button>
+        </div>
+        <div class="composer__meta">
+          <button class="model-pill" data-action="open-models" id="modelPill">
+            <span class="model-pill__dot"></span>
+            <span id="modelPillName">—</span>
+          </button>
+          <span class="composer__hint" id="composerHint">Enter — отправить · Shift+Enter — строка</span>
+          <span class="composer__count" id="counter"></span>
+        </div>
+      </div>
+      <div class="composer__legal">Ответы генерирует ИИ — проверяйте важное. Ключ хранится только на этом устройстве.</div>
+    </div>
+  </main>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="overlay__scrim" data-action="close-overlay"></div>
+  <div class="overlay__host" id="overlayHost"></div>
+</div>
+
+<div class="dropzone" id="dropzone" hidden>
+  <div class="dropzone__inner">
+    <span data-icon="image"></span>
+    <strong>Отпустите изображение</strong>
+    <span>оно добавится к сообщению</span>
+  </div>
+</div>
+
+<div class="snackbar-host" id="snackbarHost" aria-live="polite"></div>
+<input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+
+<script src="js/site-mode.js"></script>
+<script src="js/palette.js"></script>
+<script src="js/markdown.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+<script src="js/onboarding.js"></script>
+</body>
+</html>
